@@ -18,5 +18,7 @@ Route::get('/', function () {
 });
 Route::get('jsonapi','App\Http\Controllers\JsonApiController@index')->name('jsonapi');
 Route::get('duplicatejsonapi','App\Http\Controllers\JsonApiController@duplicatejsonapi')->name('duplicatejsonapi');
-
+Route::any('create-users','App\Http\Controllers\JsonApiController@createusers')->name('createusers');
+Route::any('send-email','App\Http\Controllers\JsonApiController@sendemail')->name('sendemail');
+Route::get('public-ip','App\Http\Controllers\JsonApiController@public_ip')->name('public_ip');
 

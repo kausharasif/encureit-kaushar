@@ -3,6 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use  App\Models\users;
+use Validator;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Response;
 
 class JsonApiController extends Controller
 {
@@ -136,5 +141,67 @@ $csv_row ='';
 header('Content-Disposition: attachment; filename=data.csv');
 echo $csv_header . $csv_row;
 exit;
+    }
+    public function createusers(Request $request)
+    {
+        if($request->isMethod('post'))
+        {
+            $validator = Validator::make($request->all(), [ // <---
+                'first_name' => 'required',
+                'last_name' => 'required',
+            ]);
+        //    dd($validator);
+            if ($validator->fails())
+            {
+                return redirect('create-users')->with('errors',$validator->errors())->withInput();
+                // The given data did not pass validation.
+            }
+            $users = new users();
+            $users->first_name = $request->first_name;
+            $users->last_name = $request->last_name;
+            $users->save();
+            return redirect('create-users')->with('message','Users Added Successfully');
+        }
+        else{
+            return view('users');
+        }
+    }
+    public function sendemail(Request $request)
+    {
+        if($request->isMethod('post'))
+        {
+            $validator = Validator::make($request->all(), [ // <---
+                'email_id' => 'required',
+                'message_data' => 'required',
+            ]);
+        //    dd($validator);
+            if ($validator->fails())
+            {
+                return redirect('send-email')->with('errors',$validator->errors())->withInput();
+                // The given data did not pass validation.
+            }
+            $data = array('message_data'=>$request->message_data);
+            $mail_from = $request->email_id;
+            Mail::send('mail/inquiry', $data, function($message) use ($request,$mail_from) {
+                $message->to($mail_from)->subject
+                   ('Inquiry');
+                $message->from('asifkaushar@gmail.com','Inquiry');
+             });
+             return redirect('send-email')->with('message','Email has been sent to that person successfully');
+        }
+        else{
+            return view('send_email');
+        }
+    }
+    public function public_ip(Request $request)
+    {
+        $ip = $request->ip();
+      
+        $response = new \Illuminate\Http\Response('Hello, World!');;
+        $response->withCookie(Cookie::make('ip', $ip));
+       
+        $value = $request->cookie('ip');
+        dd($value);
+
     }
 }
